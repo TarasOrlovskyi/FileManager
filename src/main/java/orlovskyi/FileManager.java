@@ -6,51 +6,74 @@ public class FileManager {
 
     static int countDirs(String path) {
         File file = new File(path);
-        File[] files = file.listFiles();
         int count = 0;
-        for (File file1 : files) {
-            if (file1.isDirectory()) {
-                count++;
-                count += countDirs(file1.getAbsolutePath());
+        if (!file.isDirectory()){
+            return 0;
+        }
+        try {
+            File[] files = file.listFiles();
+            for (File file1 : files) {
+                if (file1.isDirectory()) {
+                    count++;
+                    count += countDirs(file1.getAbsolutePath());
+                }
             }
+        } catch (NullPointerException e) {
+            e.getStackTrace();
         }
         return count;
     }
 
     static int countFiles(String path) {
         File file = new File(path);
-        File[] files = file.listFiles();
         int count = 0;
-        for (File file1 : files) {
-            if (!file1.isDirectory()) {
-                count++;
-            } else {
-                count += countFiles(file1.getAbsolutePath());
+        if (!file.isDirectory() && file.exists()){
+            return 1;
+        }
+        try {
+            File[] files = file.listFiles();
+            for (File file1 : files) {
+                if (!file1.isDirectory()) {
+                    count++;
+                } else {
+                    count += countFiles(file1.getAbsolutePath());
+                }
             }
+        } catch (NullPointerException e) {
+            e.getStackTrace();
         }
         return count;
     }
 
     public static void copy(String from, String to) {
         File pathFrom = new File(from);
-        File[] files = pathFrom.listFiles();
-        for (File file : files) {
-            File pathTo = new File(to, file.getName());
-            pathFrom = new File(from, file.getName());
-            if (file.isDirectory()) {
-                copyDir(pathTo);
-                copy(String.valueOf(pathFrom), String.valueOf(pathTo));
-            } else {
-                copyFile(file, pathTo);
+        File pathTo = new File(to, pathFrom.getName());
+        if (pathFrom.isDirectory()) {
+            File[] files = pathFrom.listFiles();
+            for (File file : files) {
+                pathTo = new File(to, file.getName());
+                pathFrom = new File(from, file.getName());
+                if (file.isDirectory()) {
+                    copyDir(pathTo);
+                    copy(String.valueOf(pathFrom), String.valueOf(pathTo));
+                } else {
+                    copyFile(file, pathTo);
+                }
             }
+        } else if (pathFrom.exists()){
+            copyFile(pathFrom, pathTo);
         }
     }
 
     public static void move(String from, String to) {
         File pathFrom = new File(from);
-        File[] files = pathFrom.listFiles();
-        for (File file : files) {
-            file.renameTo(new File(to, file.getName()));
+        if (pathFrom.isDirectory()) {
+            File[] files = pathFrom.listFiles();
+            for (File file : files) {
+                file.renameTo(new File(to, file.getName()));
+            }
+        } else if (pathFrom.exists()){
+            pathFrom.renameTo(new File(to, pathFrom.getName()));
         }
     }
 

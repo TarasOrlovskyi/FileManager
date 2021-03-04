@@ -12,29 +12,35 @@ class FileManagerTest {
 
     @BeforeEach
     void before() throws IOException {
-        File dir = new File("DIR");
-        File file = null;
-        dir.mkdir();
-        for (int i = 1; i < 10; i++) {
-            if (i < 4) {
-                dir = new File("DIR", String.valueOf(i));
-                file = new File("DIR", "file" + i + ".txt");
-            } else if (i < 8) {
-                dir = new File("DIR/1/" + i);
-                file = new File("DIR/1", "file" + i + ".txt");
-            } else {
-                dir = new File("DIR/2/" + i);
-                file = new File("DIR/2", "file" + i + ".txt");
-            }
-            dir.mkdir();
-            file.createNewFile();
-        }
-        dir = new File("DIR_COPY");
-        dir.mkdir();
-        String contentForFile = "Never give up!!!";
-        byte[] byteContent = contentForFile.getBytes();
-        try (OutputStream outputStream = new FileOutputStream(file)) {
-            outputStream.write(byteContent);
+        new File("DIR").mkdir();
+        new File("DIR/1").mkdir();
+        new File("DIR/1/2").mkdir();
+        new File("DIR/1/2/3").mkdir();
+        new File("DIR/4").mkdir();
+        new File("DIR/4/5").mkdir();
+        new File("DIR/4/5/6").mkdir();
+        new File("DIR/7").mkdir();
+        new File("DIR/7/8").mkdir();
+        new File("DIR/7/8/9").mkdir();
+        new File("DIR_COPY").mkdir();
+
+        new File("DIR", "file1.txt").createNewFile();
+        new File("DIR", "file2.txt").createNewFile();
+        new File("DIR/1", "file3.txt").createNewFile();
+        new File("DIR/1", "file4.txt").createNewFile();
+        new File("DIR/1/2", "file5.txt").createNewFile();
+        new File("DIR/1/2/3", "file6.txt").createNewFile();
+        new File("DIR/1/2/3", "file7.txt").createNewFile();
+        new File("DIR/4/5", "file8.txt").createNewFile();
+        new File("DIR/7", "file9.txt").createNewFile();
+        new File("DIR/7/8/9", "file10.txt").createNewFile();
+        new File("DIR/7/8/9", "file11.txt").createNewFile();
+        File file = new File("DIR", "fileWithContent.txt");
+        file.createNewFile();
+
+        byte[] contentInBytes = "Hello Java! Test File Manager!".getBytes();
+        try(OutputStream outputStream = new FileOutputStream(file)){
+            outputStream.write(contentInBytes);
         } catch (IOException e){
             e.printStackTrace();
         }
@@ -42,99 +48,126 @@ class FileManagerTest {
 
     @Test
     void countDirsTest() {
-        assertEquals(9, FileManager.countDirs("DIR"));
+        assertEquals(17529, FileManager.countDirs("C:/Windows"));
     }
 
     @Test
     void countFilesTest() {
-        assertEquals(9, FileManager.countFiles("DIR"));
+        assertEquals(82038, FileManager.countFiles("C:/Windows"));
     }
 
     @Test
-    void copyTest() {
+    void copyTest() throws IOException {
         FileManager.copy("DIR", "DIR_COPY");
         assertEquals(9, FileManager.countDirs("DIR"));
-        assertEquals(9, FileManager.countFiles("DIR"));
+        assertEquals(12, FileManager.countFiles("DIR"));
         assertEquals(9, FileManager.countDirs("DIR_COPY"));
-        assertEquals(9, FileManager.countFiles("DIR_COPY"));
+        assertEquals(12, FileManager.countFiles("DIR_COPY"));
 
-        assertEquals("Never give up!!!", getContent(new File("DIR_COPY/2/file9.txt")));
+        assertEquals("Hello Java! Test File Manager!", getContent(new File("DIR_COPY", "fileWithContent.txt")));
 
-        //? why appear NullPointerException when i try hand over a file
-
-//        File file = new File("tempFile.txt");
-//        file.createNewFile();
-//        FileManager.copy(file.getPath(), "DIR_COPY");
-//        assertTrue(file.exists());
-//        file.delete();
-//        file = new File("DIR_COPY/tempFile.txt");
-//        assertTrue(file.exists());
-//        file.delete();
+        File file = new File("tempFile.txt");
+        file.createNewFile();
+        FileManager.copy(file.getPath(), "DIR_COPY");
+        assertTrue(file.exists());
+        file.delete();
+        file = new File("DIR_COPY/tempFile.txt");
+        assertTrue(file.exists());
+        file.delete();
 
     }
 
     @Test
-    void moveTest() {
+    void moveTest() throws IOException {
         assertEquals(9, FileManager.countDirs("DIR"));
-        assertEquals(9, FileManager.countFiles("DIR"));
+        assertEquals(12, FileManager.countFiles("DIR"));
 
         FileManager.move("DIR", "DIR_COPY");
 
         assertEquals(0, FileManager.countDirs("DIR"));
         assertEquals(0, FileManager.countFiles("DIR"));
         assertEquals(9, FileManager.countDirs("DIR_COPY"));
-        assertEquals(9, FileManager.countFiles("DIR_COPY"));
+        assertEquals(12, FileManager.countFiles("DIR_COPY"));
 
-        assertEquals("Never give up!!!", getContent(new File("DIR_COPY/2/file9.txt")));
+        assertEquals("Hello Java! Test File Manager!", getContent(new File("DIR_COPY/fileWithContent.txt")));
+
+        File file = new File("tempFile.txt");
+        file.createNewFile();
+        assertTrue(file.exists());
+        FileManager.move(file.getPath(), "DIR_COPY");
+        assertFalse(file.exists());
+        file = new File("DIR_COPY/tempFile.txt");
+        assertTrue(file.exists());
+        file.delete();
     }
 
     @AfterEach
     void after() {
-        File path;
-        File pathCopy;
-        for (int i = 1; i < 10; i++) {
-            if (i<=3) {
-                path = new File("DIR", "file" + i + ".txt");
-                pathCopy = new File("DIR_COPY", "file" + i + ".txt");
-            } else if (i<=7){
-                path = new File("DIR/1", "file" + i + ".txt");
-                pathCopy = new File("DIR_COPY/1","file" + i + ".txt");
-            } else {
-                path = new File("DIR/2", "file" + i + ".txt");
-                pathCopy = new File("DIR_COPY/2", "file" + i + ".txt");
-            }
-            path.delete();
-            pathCopy.delete();
-        }
-        for (int i = 9; i > 0; i--) {
-            if (i>=8){
-                path = new File("DIR/2/" + i);
-                pathCopy = new File("DIR_COPY/2/" + i);
-            } else if (i>=4){
-                path = new File("DIR/1/" + i);
-                pathCopy = new File("DIR_COPY/1/" + i);
-            } else {
-                path = new File("DIR/" + i);
-                pathCopy = new File("DIR_COPY/" + i);
-            }
-            path.delete();
-            pathCopy.delete();
-        }
-        path = new File("DIR");
-        path.delete();
-        pathCopy = new File("DIR_COPY");
-        pathCopy.delete();
+        new File("DIR/1/2/3", "file6.txt").delete();
+        new File("DIR/1/2/3", "file7.txt").delete();
+        new File("DIR/7/8/9", "file10.txt").delete();
+        new File("DIR/7/8/9", "file11.txt").delete();
+
+        new File("DIR_COPY/1/2/3", "file6.txt").delete();
+        new File("DIR_COPY/1/2/3", "file7.txt").delete();
+        new File("DIR_COPY/7/8/9", "file10.txt").delete();
+        new File("DIR_COPY/7/8/9", "file11.txt").delete();
+
+        new File("DIR/1/2", "file5.txt").delete();
+        new File("DIR/4/5", "file8.txt").delete();
+
+        new File("DIR_COPY/1/2", "file5.txt").delete();
+        new File("DIR_COPY/4/5", "file8.txt").delete();
+
+        new File("DIR/1", "file3.txt").delete();
+        new File("DIR/1", "file4.txt").delete();
+        new File("DIR/7", "file9.txt").delete();
+
+        new File("DIR_COPY/1", "file3.txt").delete();
+        new File("DIR_COPY/1", "file4.txt").delete();
+        new File("DIR_COPY/7", "file9.txt").delete();
+
+        new File("DIR", "file1.txt").delete();
+        new File("DIR", "file2.txt").delete();
+        new File("DIR", "fileWithContent.txt").delete();
+
+        new File("DIR_COPY", "file1.txt").delete();
+        new File("DIR_COPY", "file2.txt").delete();
+        new File("DIR_COPY", "fileWithContent.txt").delete();
+
+        new File("DIR/1/2/3").delete();
+        new File("DIR/1/2").delete();
+        new File("DIR/1").delete();
+        new File("DIR/4/5/6").delete();
+        new File("DIR/4/5").delete();
+        new File("DIR/4").delete();
+        new File("DIR/7/8/9").delete();
+        new File("DIR/7/8").delete();
+        new File("DIR/7").delete();
+        new File("DIR").delete();
+
+        new File("DIR_COPY/1/2/3").delete();
+        new File("DIR_COPY/1/2").delete();
+        new File("DIR_COPY/1").delete();
+        new File("DIR_COPY/4/5/6").delete();
+        new File("DIR_COPY/4/5").delete();
+        new File("DIR_COPY/4").delete();
+        new File("DIR_COPY/7/8/9").delete();
+        new File("DIR_COPY/7/8").delete();
+        new File("DIR_COPY/7").delete();
+        new File("DIR_COPY").delete();
+
     }
 
-    private String getContent(File file){
+    private String getContent(File file) {
         byte[] buffer = new byte[(int) file.length()];
         StringBuilder stringBuilder = new StringBuilder();
         int count;
-        try (InputStream inputStream = new FileInputStream(file)){
-            while ((count=inputStream.read(buffer))!=-1){
+        try (InputStream inputStream = new FileInputStream(file)) {
+            while ((count = inputStream.read(buffer)) != -1) {
                 stringBuilder.append(new String(buffer, 0, count));
             }
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return stringBuilder.toString();
