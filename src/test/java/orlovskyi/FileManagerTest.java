@@ -39,21 +39,21 @@ class FileManagerTest {
         file.createNewFile();
 
         byte[] contentInBytes = "Hello Java! Test File Manager!".getBytes();
-        try(OutputStream outputStream = new FileOutputStream(file)){
+        try (OutputStream outputStream = new FileOutputStream(file)) {
             outputStream.write(contentInBytes);
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @Test
     void countDirsTest() {
-        assertEquals(17529, FileManager.countDirs("C:/Windows"));
+        assertEquals(17535, FileManager.countDirs("C:/Windows"));
     }
 
     @Test
     void countFilesTest() {
-        assertEquals(82038, FileManager.countFiles("C:/Windows"));
+        assertEquals(82049, FileManager.countFiles("C:/Windows"));
     }
 
     @Test
@@ -74,11 +74,11 @@ class FileManagerTest {
         file = new File("DIR_COPY/tempFile.txt");
         assertTrue(file.exists());
         file.delete();
-
     }
 
     @Test
     void moveTest() throws IOException {
+
         assertEquals(9, FileManager.countDirs("DIR"));
         assertEquals(12, FileManager.countFiles("DIR"));
 

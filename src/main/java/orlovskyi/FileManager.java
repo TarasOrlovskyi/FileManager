@@ -5,12 +5,16 @@ import java.io.*;
 public class FileManager {
 
     static int countDirs(String path) {
-        File file = new File(path);
+        File file = null;
         int count = 0;
-        if (!file.isDirectory()){
-            return 0;
-        }
         try {
+            file = new File(path);
+            if (!file.exists()) {
+                throw new FileNotFoundException("File does not exist");
+            }
+            if (!file.isDirectory()) {
+                return 0;
+            }
             File[] files = file.listFiles();
             for (File file1 : files) {
                 if (file1.isDirectory()) {
@@ -18,19 +22,33 @@ public class FileManager {
                     count += countDirs(file1.getAbsolutePath());
                 }
             }
+            return count;
         } catch (NullPointerException e) {
-            e.getStackTrace();
+            System.out.println("mystery file/folder is -> " + file.getName());
+            //e.printStackTrace();
+            System.out.println(e);
+            Throwable[] throwables = e.getSuppressed();
+            System.out.println("length: " + throwables.length);
+            for (Throwable throwable : throwables) {
+                System.out.println(throwable);
+            }
+        } catch (FileNotFoundException fnf) {
+            fnf.printStackTrace();
         }
         return count;
     }
 
     static int countFiles(String path) {
-        File file = new File(path);
         int count = 0;
-        if (!file.isDirectory() && file.exists()){
-            return 1;
-        }
+        File file = null;
         try {
+            file = new File(path);
+            if (!file.exists()) {
+                throw new FileNotFoundException("File does not exist");
+            }
+            if (!file.isDirectory()) {
+                return 1;
+            }
             File[] files = file.listFiles();
             for (File file1 : files) {
                 if (!file1.isDirectory()) {
@@ -40,40 +58,70 @@ public class FileManager {
                 }
             }
         } catch (NullPointerException e) {
-            e.getStackTrace();
+            System.out.println("mystery file/folder is -> " + file.getName());
+//            e.printStackTrace();
+            System.out.println(e);
+            Throwable[] throwables = e.getSuppressed();
+            System.out.println("length: " + throwables.length);
+            for (Throwable throwable : throwables) {
+                System.out.println(throwable);
+            }
+        } catch (FileNotFoundException fnf) {
+            fnf.printStackTrace();
         }
         return count;
     }
 
     public static void copy(String from, String to) {
-        File pathFrom = new File(from);
-        File pathTo = new File(to, pathFrom.getName());
-        if (pathFrom.isDirectory()) {
-            File[] files = pathFrom.listFiles();
-            for (File file : files) {
-                pathTo = new File(to, file.getName());
-                pathFrom = new File(from, file.getName());
-                if (file.isDirectory()) {
-                    copyDir(pathTo);
-                    copy(String.valueOf(pathFrom), String.valueOf(pathTo));
-                } else {
-                    copyFile(file, pathTo);
-                }
+        try {
+            File pathFrom = new File(from);
+            File pathTo = new File(to);
+            if (!pathFrom.exists() || !pathTo.exists()) {
+                throw new FileNotFoundException("File not found!");
             }
-        } else if (pathFrom.exists()){
-            copyFile(pathFrom, pathTo);
+            if (pathFrom.isDirectory()) {
+                File[] files = pathFrom.listFiles();
+                for (File file : files) {
+                    pathTo = new File(to, file.getName());
+                    pathFrom = new File(from, file.getName());
+                    if (file.isDirectory()) {
+                        copyDir(pathTo);
+                        copy(String.valueOf(pathFrom), String.valueOf(pathTo));
+                    } else {
+                        copyFile(file, pathTo);
+                    }
+                }
+            } else {
+                copyFile(pathFrom, new File(to, pathFrom.getName()));
+            }
+        } catch (NullPointerException npe) {
+            System.out.println("File should be not null! pathFrom or pathTo is null!");
+            npe.printStackTrace();
+        } catch (FileNotFoundException fnfe) {
+            fnfe.printStackTrace();
         }
     }
 
     public static void move(String from, String to) {
-        File pathFrom = new File(from);
-        if (pathFrom.isDirectory()) {
-            File[] files = pathFrom.listFiles();
-            for (File file : files) {
-                file.renameTo(new File(to, file.getName()));
+        try {
+            File pathFrom = new File(from);
+            File pathTo = new File(to);
+            if (!pathFrom.exists() || !pathTo.exists()) {
+                throw new FileNotFoundException("File not found!");
             }
-        } else if (pathFrom.exists()){
-            pathFrom.renameTo(new File(to, pathFrom.getName()));
+            if (pathFrom.isDirectory()) {
+                File[] files = pathFrom.listFiles();
+                for (File file : files) {
+                    file.renameTo(new File(to, file.getName()));
+                }
+            } else if (pathFrom.exists()) {
+                pathFrom.renameTo(new File(to, pathFrom.getName()));
+            }
+        } catch (NullPointerException npe) {
+            System.out.println("File should be not null! pathFrom or pathTo is null!");
+            npe.printStackTrace();
+        } catch (FileNotFoundException fnfe) {
+            fnfe.printStackTrace();
         }
     }
 
