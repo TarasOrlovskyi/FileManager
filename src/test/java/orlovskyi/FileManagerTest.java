@@ -48,16 +48,16 @@ class FileManagerTest {
 
     @Test
     void countDirsTest() {
-        assertEquals(17535, FileManager.countDirs("C:/Windows"));
+        assertEquals(17537, FileManager.countDirs("C:/Windows"));
     }
 
     @Test
     void countFilesTest() {
-        assertEquals(82049, FileManager.countFiles("C:/Windows"));
+        assertEquals(82048, FileManager.countFiles("C:/Windows"));
     }
 
     @Test
-    void copyTest() throws IOException {
+    void copyFromFolderTest() {
         FileManager.copy("DIR", "DIR_COPY");
         assertEquals(9, FileManager.countDirs("DIR"));
         assertEquals(12, FileManager.countFiles("DIR"));
@@ -65,19 +65,25 @@ class FileManagerTest {
         assertEquals(12, FileManager.countFiles("DIR_COPY"));
 
         assertEquals("Hello Java! Test File Manager!", getContent(new File("DIR_COPY", "fileWithContent.txt")));
+    }
 
+    @Test
+    void copyFileTest() throws IOException {
         File file = new File("tempFile.txt");
         file.createNewFile();
-        FileManager.copy(file.getPath(), "DIR_COPY");
         assertTrue(file.exists());
+
+        FileManager.copy(file.getPath(), "DIR_COPY");
+
         file.delete();
+
         file = new File("DIR_COPY/tempFile.txt");
         assertTrue(file.exists());
         file.delete();
     }
 
     @Test
-    void moveTest() throws IOException {
+    void moveFromFolderTest() {
 
         assertEquals(9, FileManager.countDirs("DIR"));
         assertEquals(12, FileManager.countFiles("DIR"));
@@ -90,12 +96,18 @@ class FileManagerTest {
         assertEquals(12, FileManager.countFiles("DIR_COPY"));
 
         assertEquals("Hello Java! Test File Manager!", getContent(new File("DIR_COPY/fileWithContent.txt")));
+    }
 
+    @Test
+    void moveFileTest() throws IOException {
         File file = new File("tempFile.txt");
         file.createNewFile();
         assertTrue(file.exists());
+
         FileManager.move(file.getPath(), "DIR_COPY");
+
         assertFalse(file.exists());
+
         file = new File("DIR_COPY/tempFile.txt");
         assertTrue(file.exists());
         file.delete();
