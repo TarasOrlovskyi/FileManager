@@ -25,13 +25,7 @@ public class FileManager {
             return count;
         } catch (NullPointerException e) {
             System.out.println("mystery file/folder is -> " + file.getName());
-            //e.printStackTrace();
             System.out.println(e);
-            Throwable[] throwables = e.getSuppressed();
-            System.out.println("length: " + throwables.length);
-            for (Throwable throwable : throwables) {
-                System.out.println(throwable);
-            }
         } catch (FileNotFoundException fnf) {
             fnf.printStackTrace();
         }
@@ -59,13 +53,7 @@ public class FileManager {
             }
         } catch (NullPointerException e) {
             System.out.println("mystery file/folder is -> " + file.getName());
-//            e.printStackTrace();
             System.out.println(e);
-            Throwable[] throwables = e.getSuppressed();
-            System.out.println("length: " + throwables.length);
-            for (Throwable throwable : throwables) {
-                System.out.println(throwable);
-            }
         } catch (FileNotFoundException fnf) {
             fnf.printStackTrace();
         }
