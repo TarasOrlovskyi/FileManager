@@ -5,111 +5,126 @@ import java.io.*;
 public class FileManager {
 
     static int countDirs(String path) {
-        File file = null;
-        int count = 0;
         try {
-            file = new File(path);
-            if (!file.exists()) {
-                throw new FileNotFoundException("File does not exist");
-            }
-            if (!file.isDirectory()) {
+            int count = 0;
+            validateNullPath(path);
+            File pathForCount = new File(path);
+            validateFileExistence(pathForCount);
+            if (!pathForCount.isDirectory()) {
                 return 0;
             }
-            File[] files = file.listFiles();
-            for (File file1 : files) {
-                if (file1.isDirectory()) {
-                    count++;
-                    count += countDirs(file1.getAbsolutePath());
+            File[] files = pathForCount.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        count++;
+                        count += countDirs(file.getAbsolutePath());
+                    }
                 }
+            } else {
+                System.out.println("Attention! You don't have permission to read " + pathForCount);
             }
             return count;
-        } catch (NullPointerException e) {
-            System.out.println("mystery file/folder is -> " + file.getName());
-            System.out.println(e);
-        } catch (FileNotFoundException fnf) {
-            fnf.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException();
         }
-        return count;
     }
 
     static int countFiles(String path) {
-        int count = 0;
-        File file = null;
         try {
-            file = new File(path);
-            if (!file.exists()) {
-                throw new FileNotFoundException("File does not exist");
-            }
-            if (!file.isDirectory()) {
+            int count = 0;
+            validateNullPath(path);
+            File pathForCount = new File(path);
+            validateFileExistence(pathForCount);
+            if (!pathForCount.isDirectory()) {
                 return 1;
             }
-            File[] files = file.listFiles();
-            for (File file1 : files) {
-                if (!file1.isDirectory()) {
-                    count++;
-                } else {
-                    count += countFiles(file1.getAbsolutePath());
+            File[] files = pathForCount.listFiles();
+            if (files!=null) {
+                for (File file : files) {
+                    if (!file.isDirectory()) {
+                        count++;
+                    } else {
+                        count += countFiles(file.getAbsolutePath());
+                    }
                 }
+            } else {
+                System.out.println("Attention! You don't have permission to read " + pathForCount);
             }
-        } catch (NullPointerException e) {
-            System.out.println("mystery file/folder is -> " + file.getName());
-            System.out.println(e);
-        } catch (FileNotFoundException fnf) {
-            fnf.printStackTrace();
+            return count;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException();
         }
-        return count;
     }
 
     public static void copy(String from, String to) {
         try {
+            validateNullPath(from);
+            validateNullPath(to);
+
             File pathFrom = new File(from);
             File pathTo = new File(to);
-            if (!pathFrom.exists() || !pathTo.exists()) {
-                throw new FileNotFoundException("File not found!");
-            }
-            if (pathFrom.isDirectory()) {
-                File[] files = pathFrom.listFiles();
-                for (File file : files) {
-                    pathTo = new File(to, file.getName());
-                    pathFrom = new File(from, file.getName());
-                    if (file.isDirectory()) {
-                        copyDir(pathTo);
-                        copy(String.valueOf(pathFrom), String.valueOf(pathTo));
-                    } else {
-                        copyFile(file, pathTo);
-                    }
-                }
-            } else {
+
+            validateFileExistence(pathFrom);
+            validateFileExistence(pathTo);
+
+            validateDirectoryPath(pathTo);
+
+            if (pathFrom.isFile()) {
                 copyFile(pathFrom, new File(to, pathFrom.getName()));
+            } else {
+                File[] files = pathFrom.listFiles();
+                if (files!=null) {
+                    for (File file : files) {
+                        pathTo = new File(to, file.getName());
+                        pathFrom = new File(from, file.getName());
+                        if (file.isDirectory()) {
+                            createDirInDestinationDir(pathTo);
+                            copy(String.valueOf(pathFrom), String.valueOf(pathTo));
+                        } else {
+                            copyFile(file, pathTo);
+                        }
+                    }
+                } else {
+                    System.out.println("Attention! You don't have permission to read " + pathFrom);
+                }
             }
-        } catch (NullPointerException npe) {
-            System.out.println("File should be not null! pathFrom or pathTo is null!");
-            npe.printStackTrace();
-        } catch (FileNotFoundException fnfe) {
-            fnfe.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException();
         }
     }
 
     public static void move(String from, String to) {
         try {
+            validateNullPath(from);
+            validateNullPath(to);
+
             File pathFrom = new File(from);
             File pathTo = new File(to);
-            if (!pathFrom.exists() || !pathTo.exists()) {
-                throw new FileNotFoundException("File not found!");
-            }
+
+            validateFileExistence(pathFrom);
+            validateFileExistence(pathTo);
+
+            validateDirectoryPath(pathTo);
+
             if (pathFrom.isDirectory()) {
                 File[] files = pathFrom.listFiles();
-                for (File file : files) {
-                    file.renameTo(new File(to, file.getName()));
+                if (files!=null) {
+                    for (File file : files) {
+                        file.renameTo(new File(to, file.getName()));
+                    }
+                } else {
+                    System.out.println("Attention! You don't have permission to read the " + pathFrom);
                 }
-            } else if (pathFrom.exists()) {
+            } else {
                 pathFrom.renameTo(new File(to, pathFrom.getName()));
             }
-        } catch (NullPointerException npe) {
-            System.out.println("File should be not null! pathFrom or pathTo is null!");
-            npe.printStackTrace();
-        } catch (FileNotFoundException fnfe) {
-            fnfe.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException();
         }
     }
 
@@ -125,7 +140,25 @@ public class FileManager {
         }
     }
 
-    private static void copyDir(File pathTo) {
+    private static void createDirInDestinationDir(File pathTo) {
         pathTo.mkdir();
+    }
+
+    private static void validateNullPath(String path) throws Exception {
+        if (path == null) {
+            throw new Exception("Path is NULL. You should change the path to the correct one!");
+        }
+    }
+
+    private static void validateFileExistence(File path) throws FileNotFoundException {
+        if (!path.exists()) {
+            throw new FileNotFoundException("File: " + path.getAbsolutePath() + " not found!");
+        }
+    }
+
+    private static void validateDirectoryPath(File path) throws Exception {
+        if (!path.isDirectory()) {
+            throw new Exception("The copy path must be a directory!");
+        }
     }
 }
