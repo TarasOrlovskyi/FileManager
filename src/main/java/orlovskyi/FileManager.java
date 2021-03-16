@@ -99,6 +99,7 @@ public class FileManager {
 
     public static void move(String from, String to) {
         try {
+            boolean flag;
             validateNullPath(from);
             validateNullPath(to);
 
@@ -114,7 +115,17 @@ public class FileManager {
                 File[] files = pathFrom.listFiles();
                 if (files!=null) {
                     for (File file : files) {
-                        file.renameTo(new File(to, file.getName()));
+                        flag = file.renameTo(new File(to, file.getName()));
+                        //task with star *
+                        if (!flag){
+                            if (file.isDirectory()) {
+                                copy(file.getAbsolutePath(), to + "/" + file.getName());
+                            } else {
+                                copy(file.getAbsolutePath(), to);
+                            }
+                            clearFilesAfterCopy(new File(file.getAbsolutePath()));
+                            file.delete();
+                        }
                     }
                 } else {
                     System.out.println("Attention! You don't have permission to read the " + pathFrom);
@@ -142,6 +153,19 @@ public class FileManager {
 
     private static void createDirInDestinationDir(File pathTo) {
         pathTo.mkdir();
+    }
+
+    private static void clearFilesAfterCopy(File clearPath) {
+        if (clearPath.isDirectory()){
+            for (File path : clearPath.listFiles()){
+                if (path.isDirectory()){
+                    clearFilesAfterCopy(path);
+                }
+                path.delete();
+            }
+        } else {
+            clearPath.delete();
+        }
     }
 
     private static void validateNullPath(String path) throws Exception {

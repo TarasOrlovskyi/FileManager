@@ -201,6 +201,21 @@ class FileManagerTest {
     }
 
     @Test
+    void moveIfFilesIsExistInDestination(){
+        assertEquals(4, FileManager.countDirs(PATH_TO_TEST_DIRS + "1"));
+        assertEquals(5, FileManager.countFiles(PATH_TO_TEST_DIRS + "1"));
+
+        FileManager.move(PATH_TO_TEST_DIRS + "1", PATH_TO_TEST_DIRS + "2");
+
+        assertEquals(0, FileManager.countDirs(PATH_TO_TEST_DIRS + "1"));
+        assertEquals(0, FileManager.countFiles(PATH_TO_TEST_DIRS + "1"));
+        assertEquals(4, FileManager.countDirs(PATH_TO_TEST_DIRS + "2"));
+        assertEquals(5, FileManager.countFiles(PATH_TO_TEST_DIRS + "2"));
+
+        FileManager.copy(PATH_TO_TEST_DIRS + "2", PATH_TO_TEST_DIRS + "1");
+    }
+
+    @Test
     void moveWithNullParameterFromWhereMoveTest() {
         assertThrows(RuntimeException.class, () -> {
             FileManager.move(null, PATH_TO_TEST_DIRS + "DIR_COPY");
