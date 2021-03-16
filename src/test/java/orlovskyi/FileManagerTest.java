@@ -204,6 +204,8 @@ class FileManagerTest {
     void moveIfFilesIsExistInDestination(){
         assertEquals(4, FileManager.countDirs(PATH_TO_TEST_DIRS + "1"));
         assertEquals(5, FileManager.countFiles(PATH_TO_TEST_DIRS + "1"));
+        assertEquals(4, FileManager.countDirs(PATH_TO_TEST_DIRS + "2"));
+        assertEquals(5, FileManager.countFiles(PATH_TO_TEST_DIRS + "2"));
 
         FileManager.move(PATH_TO_TEST_DIRS + "1", PATH_TO_TEST_DIRS + "2");
 
